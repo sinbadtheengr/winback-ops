@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+openai
+pandas
+numpy
+pydantic
+python-multipart
+sse-starlette
+pytest
+ruff
