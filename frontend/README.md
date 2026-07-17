@@ -1,6 +1,6 @@
 # Frontend — init on Day 1
 
-Not scaffolded yet (keeps the repo light). First Claude Code session, run:
+Not scaffolded yet (keeps the repo light). First Codex session, run:
 
 ```bash
 npx create-next-app@latest . --typescript --tailwind --app --eslint --no-src-dir --import-alias "@/*"

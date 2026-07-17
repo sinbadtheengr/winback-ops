@@ -123,4 +123,4 @@ curl.exe -F "file=@sample_data/clinic_a.csv" http://localhost:8000/api/datasets
 - [`docs/PLAN.md`](docs/PLAN.md) — hackathon plan, architecture, schedule
 - [`docs/DEMO_VIDEO.md`](docs/DEMO_VIDEO.md) — recording script and capture checklist
 - [`docs/DEVPOST_WRITEUP.md`](docs/DEVPOST_WRITEUP.md) — ready-to-paste submission draft
-- [`CLAUDE.md`](CLAUDE.md) — agent/contributor context
+- [`CODEX.md`](CODEX.md) — agent/contributor context

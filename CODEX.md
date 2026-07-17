@@ -1,4 +1,4 @@
-# CLAUDE.md — Winback Ops
+# CODEX.md — Winback Ops
 
 ## What this is
 
@@ -12,7 +12,7 @@ code for that dataset**, dashboard shows recoverable revenue in dollars, human
 approves win-back email sequences.
 
 IMPORTANT: This is an OpenAI hackathon — the PRODUCT must use OpenAI's GPT-5.6
-via the OpenAI API for all agent steps. Claude Code is the build tool only.
+via the OpenAI API for all agent steps. Codex is the build tool only.
 Never wire Anthropic API calls into the product.
 
 ## Stack
