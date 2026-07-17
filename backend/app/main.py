@@ -2,6 +2,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.datasets import router as datasets_router
+
 app = FastAPI(title="Winback Ops")
 
 app.add_middleware(
@@ -11,13 +13,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(datasets_router, prefix="/api")
+
 
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok"}
 
 
-# TODO (Day 1): POST /api/datasets — CSV upload + storage
 # TODO (Day 2): POST /api/datasets/{id}/profile — profiler agent
 # TODO (Day 3): POST /api/datasets/{id}/segment — codegen + sandbox loop
 #               GET  /api/runs/{id}/stream — SSE agent activity

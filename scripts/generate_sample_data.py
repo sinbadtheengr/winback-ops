@@ -4,7 +4,7 @@ Three clinics, three different schemas, three different flavors of dirty data.
 The codegen agent must handle all of them — that's the whole point.
 
 Usage: python scripts/generate_sample_data.py
-Output: sample_data/clinic_{a,b,c}.csv
+Output: sample_data/clinic_{a,b,c,adversarial}.csv
 """
 from __future__ import annotations
 
@@ -122,8 +122,40 @@ def write_clinic_c(clients: list[dict], today: date) -> None:
     print(f"wrote {path}")
 
 
+def write_adversarial_clinic(clients: list[dict], today: date) -> None:
+    """Clinic D: a semicolon export with altered headers and malformed rows.
+
+    It exercises delimiter inference, descriptive headers, mixed money/date
+    formats, compact service aliases, duplicate visits, and records that must
+    be discarded because their date cannot be parsed.
+    """
+    path = OUT / "clinic_adversarial.csv"
+    notes = ["follow up", "VIP; priority", "", "verify consent", "legacy import"]
+    aliases = {
+        "botox": ["TOX 50u", "Neuro-toxin"],
+        "laser": ["LHR Legs", "Laser Hair Removal - legs"],
+        "facial": ["Hydra Facial", "signature facial"],
+        "filler": ["Dermal filler", "Lip-filler"],
+        "microneedling": ["Micro-needling + PRP", "Skin Pen"],
+    }
+    with path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f, delimiter=";")
+        w.writerow(["Client Ref", "Full Name", "Email Address", "Procedure", "Completed On", "Paid (CAD)", "Internal Notes"])
+        for c in clients:
+            for d, _, amt in visits_for(c, today):
+                formatted_date = random.choice((d.isoformat(), d.strftime("%d-%b-%y"), d.strftime("%m/%d/%Y")))
+                paid = f"CAD {amt:,.2f}" if random.random() < 0.5 else f"${amt:,.2f}"
+                row = [f"C-{c['id']:04d}", dirty(c["name"]), c["email"], random.choice(aliases[c["fav"]]), formatted_date, paid, random.choice(notes)]
+                w.writerow(row)
+                if random.random() < 0.07:
+                    w.writerow(row)
+        w.writerow(["C-BAD", "Legacy Record", "", "TOX 50u", "not-a-date", "CAD 300.00", "discard this malformed date"])
+    print(f"wrote {path}")
+
+
 if __name__ == "__main__":
     today = date(2026, 7, 14)
     write_clinic_a(make_clients(120), today)
     write_clinic_b(make_clients(90), today)
     write_clinic_c(make_clients(150), today)
+    write_adversarial_clinic(make_clients(70), today)

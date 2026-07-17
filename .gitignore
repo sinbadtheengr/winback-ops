@@ -5,5 +5,7 @@ __pycache__/
 node_modules/
 .next/
 *.sqlite3
+*.tsbuildinfo
 sample_data/*.csv
+backend/data/uploads/
 .DS_Store
