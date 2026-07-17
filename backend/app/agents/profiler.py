@@ -50,10 +50,14 @@ class ProfilingError(RuntimeError):
 
 def _csv_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     contents = path.read_text(encoding="utf-8-sig")
+    header_line = contents.splitlines()[0] if contents.splitlines() else ""
     try:
-        dialect = csv.Sniffer().sniff(contents[:4096], delimiters=",;\t")
+        dialect = csv.Sniffer().sniff(header_line, delimiters=",;\t")
     except csv.Error:
-        dialect = csv.excel
+        try:
+            dialect = csv.Sniffer().sniff(contents[:4096], delimiters=",;\t")
+        except csv.Error:
+            dialect = csv.excel
     reader = csv.DictReader(io.StringIO(contents), dialect=dialect)
     headers = reader.fieldnames or []
     return headers, [dict(row) for row in reader]

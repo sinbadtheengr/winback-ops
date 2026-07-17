@@ -43,10 +43,16 @@ def _read_csv_metadata(contents: bytes) -> tuple[list[str], int]:
             detail="CSV files must be UTF-8 encoded.",
         ) from exc
 
+    # Detect from the header first: later quoted free-text fields can make the
+    # full sample ambiguous even when the delimiter is clear in row one.
+    header_line = decoded.splitlines()[0] if decoded.splitlines() else ""
     try:
-        dialect = csv.Sniffer().sniff(decoded[:4096], delimiters=",;\t")
+        dialect = csv.Sniffer().sniff(header_line, delimiters=",;\t")
     except csv.Error:
-        dialect = csv.excel
+        try:
+            dialect = csv.Sniffer().sniff(decoded[:4096], delimiters=",;\t")
+        except csv.Error:
+            dialect = csv.excel
 
     rows = csv.reader(io.StringIO(decoded), dialect)
     try:

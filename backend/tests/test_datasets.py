@@ -28,3 +28,13 @@ def test_upload_rejects_non_csv_file() -> None:
     )
 
     assert response.status_code == 415
+
+
+def test_upload_detects_semicolon_delimited_csv(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr("app.api.datasets.UPLOADS_DIRECTORY", tmp_path)
+    response = client.post(
+        "/api/datasets",
+        files={"file": ("clinic.csv", b"Client Ref;Procedure;Completed On\nC-1;Botox;2026-01-01\n", "text/csv")},
+    )
+    assert response.status_code == 201
+    assert response.json()["columns"] == ["Client Ref", "Procedure", "Completed On"]
