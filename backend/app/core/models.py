@@ -82,9 +82,20 @@ class Segment(StructuredModel):
     recoverable_revenue: float = Field(ge=0)
 
 
+class DataQuality(StructuredModel):
+    input_rows: int = Field(ge=0)
+    unique_rows: int = Field(ge=0)
+    accepted_rows: int = Field(ge=0)
+    excluded_duplicate_rows: int = Field(ge=0)
+    excluded_invalid_dates: int = Field(ge=0)
+    excluded_missing_identity: int = Field(ge=0)
+    excluded_unclassified_service: int = Field(ge=0)
+
+
 class SegmentationResult(StructuredModel):
     segments: list[Segment]
     totals: dict[str, float | int]
+    quality: DataQuality | None = None
 
 
 class Campaign(StructuredModel):

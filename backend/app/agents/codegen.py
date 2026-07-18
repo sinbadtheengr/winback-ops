@@ -50,15 +50,22 @@ def client_key(row):
     return ""
 
 def main(path):
-    df = pd.read_csv(path, sep=None, engine="python").drop_duplicates()
+    df = pd.read_csv(path, sep=None, engine="python")
+    input_rows = len(df)
+    df = df.drop_duplicates()
+    unique_rows = len(df)
     m = CONFIG["mapping"]
     df["client_key"] = df.apply(client_key, axis=1)
     df["service"] = df[m["service"]].map(canonical_service)
     df["visit_date"] = pd.to_datetime(df[m["appointment_date"]], errors="coerce")
     amount = m.get("amount_paid")
     df["amount"] = pd.to_numeric(df[amount].astype(str).str.replace(r"[^0-9.-]", "", regex=True), errors="coerce").fillna(0) if amount else 0
+    invalid_dates = int(df["visit_date"].isna().sum())
     df = df.dropna(subset=["visit_date"])
-    df = df[(df["client_key"] != "") & (df["service"] != "other")]
+    missing_identity = int((df["client_key"] == "").sum())
+    df = df[df["client_key"] != ""]
+    unclassified_service = int((df["service"] == "other").sum())
+    df = df[df["service"] != "other"]
     groups = {{}}
     for (key, service), group in df.groupby(["client_key", "service"]):
         last = group["visit_date"].max().date()
@@ -71,7 +78,8 @@ def main(path):
     for name, clients in sorted(groups.items()):
         revenue = round(sum(c["avg_ticket"] * RATES[c.pop("bucket")] for c in clients), 2)
         segments.append({{"name": name, "clients": clients, "recoverable_revenue": revenue}})
-    print(json.dumps({{"segments": segments, "totals": {{"dormant_clients": sum(len(s["clients"]) for s in segments), "recoverable_revenue": round(sum(s["recoverable_revenue"] for s in segments), 2)}}}}))
+    quality = {{"input_rows": input_rows, "unique_rows": unique_rows, "accepted_rows": len(df), "excluded_duplicate_rows": input_rows - unique_rows, "excluded_invalid_dates": invalid_dates, "excluded_missing_identity": missing_identity, "excluded_unclassified_service": unclassified_service}}
+    print(json.dumps({{"segments": segments, "totals": {{"dormant_clients": sum(len(s["clients"]) for s in segments), "recoverable_revenue": round(sum(s["recoverable_revenue"] for s in segments), 2)}}, "quality": quality}}))
 
 main("__CSV_PATH__")
 '''

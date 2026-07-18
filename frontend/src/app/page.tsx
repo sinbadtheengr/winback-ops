@@ -30,6 +30,15 @@ type DatasetProfile = {
 type SegmentationResult = {
   totals: { dormant_clients: number; recoverable_revenue: number };
   segments: Array<{ name: string; clients: Array<unknown>; recoverable_revenue: number }>;
+  quality?: {
+    input_rows: number;
+    unique_rows: number;
+    accepted_rows: number;
+    excluded_duplicate_rows: number;
+    excluded_invalid_dates: number;
+    excluded_missing_identity: number;
+    excluded_unclassified_service: number;
+  } | null;
 };
 
 type Campaign = {
@@ -336,6 +345,20 @@ export default function Home() {
               <div><p className="text-sm text-slate-400">Recoverable revenue</p><p className="mt-1 text-3xl font-semibold">${segmentation.totals.recoverable_revenue.toLocaleString()}</p></div>
               <div><p className="text-sm text-slate-400">Segments</p><p className="mt-1 text-3xl font-semibold">{segmentation.segments.length}</p></div>
             </div>
+            {segmentation.quality && (
+              <div className="mt-6 rounded-xl border border-cyan-900 bg-slate-950/40 p-4">
+                <h2 className="font-semibold">Data quality audit</h2>
+                <p className="mt-1 text-sm text-slate-400">Rows are filtered in order to protect campaign quality.</p>
+                <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                  <div><dt className="text-slate-400">Input rows</dt><dd className="font-semibold">{segmentation.quality.input_rows}</dd></div>
+                  <div><dt className="text-slate-400">Accepted rows</dt><dd className="font-semibold text-emerald-300">{segmentation.quality.accepted_rows}</dd></div>
+                  <div><dt className="text-slate-400">Duplicate rows removed</dt><dd className="font-semibold">{segmentation.quality.excluded_duplicate_rows}</dd></div>
+                  <div><dt className="text-slate-400">Invalid dates excluded</dt><dd className="font-semibold">{segmentation.quality.excluded_invalid_dates}</dd></div>
+                  <div><dt className="text-slate-400">Missing identities excluded</dt><dd className="font-semibold">{segmentation.quality.excluded_missing_identity}</dd></div>
+                  <div><dt className="text-slate-400">Unclassified services excluded</dt><dd className="font-semibold">{segmentation.quality.excluded_unclassified_service}</dd></div>
+                </dl>
+              </div>
+            )}
             <button className="mt-6 rounded-lg bg-cyan-300 px-5 py-3 font-semibold text-slate-950 disabled:opacity-60" disabled={isCreatingCampaigns} onClick={createCampaigns} type="button">
               {isCreatingCampaigns ? "Drafting campaigns…" : "Draft win-back campaigns"}
             </button>
