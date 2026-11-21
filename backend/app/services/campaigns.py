@@ -14,6 +14,12 @@ class CampaignError(RuntimeError):
 
 
 def _draft_for_segment(dataset_id: str, name: str, client_count: int, revenue: float) -> Campaign:
+    clinic = get_setting("CAMPAIGN_CLINIC_NAME", "") or ""
+    address = get_setting("CAMPAIGN_MAILING_ADDRESS", "") or ""
+    contact = get_setting("CAMPAIGN_REPLY_EMAIL", "") or ""
+    footer = (f"{clinic} · {address} · {contact}\nTo unsubscribe, email {contact} with the subject Unsubscribe."
+              if clinic.strip() and address.strip() and "@" in contact
+              else "Demo draft only. Configure the clinic name, mailing address and monitored reply email before use.")
     service = name.split("_")[0].replace("-", " ").title()
     return Campaign(
         id=uuid4().hex,
@@ -24,7 +30,7 @@ def _draft_for_segment(dataset_id: str, name: str, client_count: int, revenue: f
         subject=f"A {service} visit, when you're ready",
         body=(f"Hi there,\n\nIt's been a little while since your last {service} visit. "
               "If you're ready to refresh your routine, reply to this email and we'll help find a time that works.\n\n"
-              "Warmly,\nYour clinic team"),
+              f"Warmly,\nYour clinic team\n\n{footer}"),
         status="draft",
     )
 
